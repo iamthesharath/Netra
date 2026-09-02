@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Environment
+.env
+*.env
+
+# Uploads and generated files (too large for git)
+backend/uploads/
+backend/clips/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Flutter / Android (separate project)
+netra_android/
+
+# Misc
+prototype/
+.DS_Store
+Thumbs.db
