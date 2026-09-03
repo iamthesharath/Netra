@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: '/api' })
+export const BACKEND_URL = import.meta.env.VITE_API_URL || ''
+
+const api = axios.create({ baseURL: `${BACKEND_URL}/api` })
 
 export const getCases = () => api.get('/cases').then(r => r.data)
 

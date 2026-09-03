@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { verifySighting } from '../api'
+import { verifySighting, BACKEND_URL } from '../api'
 
 function fmtTime(seconds) {
   const m = Math.floor(seconds / 60)
@@ -31,7 +31,7 @@ export default function SightingCard({ sighting, index, onRefresh }) {
         <div className="flex-shrink-0">
           {sighting.cropped_face_url ? (
             <img
-              src={sighting.cropped_face_url}
+              src={`${BACKEND_URL}${sighting.cropped_face_url}`}
               alt="Detected face"
               className="w-16 h-16 object-cover rounded-xl border border-gray-700 bg-gray-800"
               onError={e => { e.target.style.display = 'none' }}
@@ -71,7 +71,7 @@ export default function SightingCard({ sighting, index, onRefresh }) {
           <div className="flex gap-2 flex-wrap">
             {sighting.clip_url && (
               <a
-                href={sighting.clip_url}
+                href={`${BACKEND_URL}${sighting.clip_url}`}
                 target="_blank"
                 rel="noreferrer"
                 className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg border border-gray-700 transition-colors font-medium"
