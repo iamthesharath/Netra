@@ -2,6 +2,46 @@ import os
 import cv2
 import numpy as np
 import json
+
+
+def _register_cuda_dll_dirs() -> None:
+    """Make CUDA + cuDNN discoverable so onnxruntime can load its GPU provider.
+
+    Covers the cuDNN/cuBLAS DLLs shipped in the pip 'nvidia-*' wheels plus a
+    system CUDA Toolkit install. Both os.add_dll_directory and a PATH prepend
+    are needed; add_dll_directory alone does not resolve transitive deps here.
+    Must run before onnxruntime is imported.
+    """
+    dll_dirs = []
+    try:
+        import nvidia
+        for base in getattr(nvidia, "__path__", []):
+            if not os.path.isdir(base):
+                continue
+            for sub in os.listdir(base):
+                bin_dir = os.path.join(base, sub, "bin")
+                if os.path.isdir(bin_dir):
+                    dll_dirs.append(bin_dir)
+    except ImportError:
+        pass
+
+    cuda_root = r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA"
+    if os.path.isdir(cuda_root):
+        for ver in sorted(os.listdir(cuda_root), reverse=True):
+            bin_dir = os.path.join(cuda_root, ver, "bin")
+            if os.path.isdir(bin_dir):
+                dll_dirs.append(bin_dir)
+
+    for d in dll_dirs:
+        try:
+            os.add_dll_directory(d)
+        except (OSError, AttributeError):
+            pass
+        os.environ["PATH"] = d + os.pathsep + os.environ.get("PATH", "")
+
+
+_register_cuda_dll_dirs()
+
 from insightface.app import FaceAnalysis
 from config import settings
 
@@ -11,7 +51,7 @@ _app = None
 def get_face_app() -> FaceAnalysis:
     global _app
     if _app is None:
-        # CUDA for NVIDIA GPU, falls back to CPU if CUDA not available
+        # Use the NVIDIA GPU when CUDA + cuDNN load; fall back to CPU automatically.
         providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
         _app = FaceAnalysis(name="buffalo_l", providers=providers)
         _app.prepare(ctx_id=0, det_size=(640, 640))
